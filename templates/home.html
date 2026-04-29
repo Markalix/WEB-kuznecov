@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+
+{% block title %}Главная - Интернет-магазин{% endblock %}
+
+{% block content %}
+<!--    <div style="background: #f0f0f0; padding: 10px; margin-bottom: 20px; font-size: 12px;">-->
+<!--        <strong>Отладка:</strong>-->
+<!--        session.username = {{ session.username }}<br>-->
+<!--        session.user_id = {{ session.user_id }}<br>-->
+<!--        session.login_time = {{ session.login_time }}-->
+<!--    </div>-->
+
+    {% if session and session.username %}
+        <div class="welcome">
+            <h1>С возвращением, {{ session.username }}!</h1>
+            <p>Рады снова видеть вас в нашем магазине!</p>
+            <p>Вы вошли в систему: {{ session.login_time }}</p>
+        </div>
+    {% else %}
+        <div class="welcome">
+            <h1>Добро пожаловать в интернет-магазин!</h1>
+            <p>Пожалуйста, <a href="/login">войдите</a> или <a href="/register">зарегистрируйтесь</a>, чтобы делать заказы.</p>
+        </div>
+    {% endif %}
+    {% if session and session.username %}
+        <div class="user-info">
+            <h3>Ваша информация:</h3>
+            <p>Вы авторизованы как: <strong>{{ session.username }}</strong></p>
+            <p>Время входа: {{ session.login_time }}</p>
+            <p><a href="/profile">Перейти в личный кабинет</a></p>
+        </div>
+    {% endif %}
+{% endblock %}

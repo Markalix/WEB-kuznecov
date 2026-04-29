@@ -10,12 +10,16 @@ class Login:
 
     def authenticate(self, username: str, password: str) -> dict:
         user = self.user_handler.get_user_by_username(username)
+
         if not user:
             return {"success": False, "message": "Пользователь не найден"}
+
         if user.password != password:
             return {"success": False, "message": "Неверный пароль"}
+
         session_token = f"{username}_{user.id}"
         self.sessions[session_token] = user.id
+
         return {
             "success": True,
             "message": "Вход выполнен успешно",
