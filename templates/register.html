@@ -1,8 +1,7 @@
 {% extends "base.html" %}
 
-{% block title %}Регистрация{% endblock %}
-
 {% block content %}
+<div class="form-container">
     <h2>Регистрация</h2>
 
     {% if error %}
@@ -13,12 +12,15 @@
         <div class="success">{{ message }}</div>
     {% endif %}
 
-    <form method="POST" action="/register">
-        <input type="text" name="username" placeholder="Имя пользователя" required><br>
-        <input type="email" name="email" placeholder="Email" required><br>
-        <input type="password" name="password" placeholder="Пароль" required><br>
+    <form method="POST">
+        <input type="text" name="username" placeholder="Имя пользователя" required>
+        <input type="email" name="email" placeholder="Email" required>
+        <input type="password" name="password" placeholder="Пароль" required>
         <button type="submit">Зарегистрироваться</button>
     </form>
 
-    <p>Уже есть аккаунт? <a href="/login">Войти</a></p>
+    <p style="text-align: center; margin-top: 15px;">
+        <a href="/login">Уже есть аккаунт? Войти</a>
+    </p>
+</div>
 {% endblock %}

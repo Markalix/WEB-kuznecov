@@ -3,72 +3,25 @@
 <head>
     <title>{% block title %}Интернет-магазин{% endblock %}</title>
     <meta charset="utf-8">
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 40px;
-            padding: 0;
-        }
-        .container {
-            max-width: 800px;
-            margin: 0 auto;
-        }
-        .error {
-            color: red;
-            background-color: #ffe6e6;
-            padding: 10px;
-            border-radius: 5px;
-            margin-bottom: 20px;
-        }
-        .success {
-            color: green;
-            background-color: #e6ffe6;
-            padding: 10px;
-            border-radius: 5px;
-            margin-bottom: 20px;
-        }
-        input {
-            width: 100%;
-            padding: 8px;
-            margin-bottom: 10px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-        }
-        button {
-            background-color: #4CAF50;
-            color: white;
-            padding: 10px 20px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-        }
-        button:hover {
-            background-color: #45a049;
-        }
-        a {
-            color: #0066cc;
-            text-decoration: none;
-        }
-        a:hover {
-            text-decoration: underline;
-        }
-        .nav {
-            margin-bottom: 20px;
-            padding-bottom: 10px;
-            border-bottom: 1px solid #ddd;
-        }
-    </style>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
 <body>
     <div class="container">
         <div class="nav">
             <a href="/">Главная</a>
-            {% if session.username %}
-                | <a href="/profile">Личный кабинет</a>
-                | <a href="/logout">Выйти ({{ session.username }})</a>
+            <a href="/profile">Профиль</a>
+            <a href="/session-info">Сессия</a>
+
+            {% if session and session.user_id %}
+                <div class="user-info">
+                    <span>Привет, <span class="user-name">{{ session.username }}</span>!</span>
+                    <a href="/logout" class="logout-btn">Выйти</a>
+                </div>
             {% else %}
-                | <a href="/register">Регистрация</a>
-                | <a href="/login">Вход</a>
+                <div class="user-info">
+                    <a href="/login">Войти</a>
+                    <a href="/register">Зарегистироваться</a>
+                </div>
             {% endif %}
         </div>
 
