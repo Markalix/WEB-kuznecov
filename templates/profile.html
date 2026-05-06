@@ -1,22 +1,177 @@
 {% extends "base.html" %}
 
+{% block title %}Личный кабинет{% endblock %}
+
 {% block content %}
-<div class="profile-info">
-    <h2>Личный кабинет</h2>
+<div class="row">
+    <div class="col-md-4 mb-4">
+        <div class="card shadow-sm sticky-top" style="top: 20px;">
+            <div class="card-body text-center">
+                <h4>{{ user.username }}</h4>
+                <p class="text-muted">{{ user.email }}</p>
+                <hr>
 
-    <div class="profile-field">
-        <label>Имя:</label>
-        <span>{{ user.username }}</span>
+                <div class="balance-card rounded-3 p-3 mb-3 bd-dark">
+                    <small class="text-white-50">Ваш баланс</small>
+                    <h2 class="mb-0">{{ "%.2f"|format(balance) }} ₽</h2>
+                </div>
+
+                <div class="d-grid gap-2">
+                    <a href="/add-listing" class="btn btn-primary">
+                        <i class="bi bi-plus-circle"></i> Добавить объявление
+                    </a>
+                    <a href="/topup" class="btn btn-outline-dark">
+                        <i class="bi bi-wallet2"></i> Пополнить баланс
+                    </a>
+                </div>
+            </div>
+        </div>
     </div>
 
-    <div class="profile-field">
-        <label>Email:</label>
-        <span>{{ user.email }}</span>
-    </div>
+    <div class="col-md-8">
+        <div class="card shadow-sm mb-4">
+            <div class="card-header bg-white">
+                <h5 class="mb-0"><i class="bi bi-bag-check"></i> Мои покупки</h5>
+            </div>
+            <div class="card-body">
+                {% if purchases %}
+                    {% for order in purchases %}
+                        <div class="order-card">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div>
+                                    <h6 class="mb-1">{{ order.title }}</h6>
+                                    <p class="text-muted small mb-1">
+                                        <i class="bi bi-currency-ruble"></i> {{ order.price }} ₽
+                                    </p>
+                                    <p class="mb-1">
+                                        <span class="badge {% if order.status == 'Доставлено' %}bg-success{% elif order.status == 'В пути' %}bg-info{% else %}bg-warning{% endif %}">
+                                            {{ order.status }}
+                                        </span>
+                                    </p>
+                                    {% if order.delivery_address %}
+                                        <p class="text-muted small mb-1">
+                                            <i class="bi bi-geo-alt"></i> {{ order.delivery_address }}
+                                        </p>
+                                    {% endif %}
+                                    {% if order.delivery_date and order.status != 'Доставлено' %}
+                                        <p class="text-muted small">
+                                            <i class="bi bi-truck"></i> Доставка: {{ order.delivery_date.strftime('%d.%m.%Y') }}
+                                        </p>
+                                    {% endif %}
+                                </div>
+                                {% if order.delivery_address %}
+                                    <button class="btn btn-sm btn-outline-secondary" type="button" data-bs-toggle="collapse" data-bs-target="#map-{{ order.id }}">
+                                        <i class="bi bi-map"></i>
+                                    </button>
+                                {% endif %}
+                            </div>
+                            {% if order.delivery_address %}
+                                <div class="collapse mt-2" id="map-{{ order.id }}">
+                                    <div class="card card-body bg-light p-2">
+                                        <div id="map-img-{{ order.id }}" class="text-center">
+                                            <div class="spinner-border spinner-border-sm text-secondary" role="status">
+                                                <span class="visually-hidden">Загрузка...</span>
+                                            </div>
+                                        </div>
+                                        <a href="https://yandex.ru/maps/?text={{ order.delivery_address|urlencode }}" target="_blank" class="small mt-2">
+                                            Открыть в Яндекс.Картах →
+                                        </a>
+                                    </div>
+                                </div>
+                                <script>
+                                    fetch(`/get-map/{{ order.id }}`)
+                                        .then(res => res.json())
+                                        .then(data => {
+                                            const container = document.getElementById('map-img-{{ order.id }}');
+                                            if (data.map_url) {
+                                                container.innerHTML = `<img src="${data.map_url}" class="img-fluid rounded" alt="Карта">`;
+                                            } else {
+                                                container.innerHTML = '<p class="text-muted small">Карта недоступна</p>';
+                                            }
+                                        });
+                                </script>
+                            {% endif %}
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <p class="text-muted text-center py-3">У вас пока нет покупок</p>
+                {% endif %}
+            </div>
+        </div>
 
-    <div class="profile-field">
-        <label>Дата регистрации:</label>
-        <span>{{ user.created_at.strftime('%d.%m.%Y') }}</span>
+        <div class="card shadow-sm mb-4">
+            <div class="card-header bg-white">
+                <h5 class="mb-0"><i class="bi bi-graph-up"></i> Мои продажи</h5>
+            </div>
+            <div class="card-body">
+                {% if sales %}
+                    {% for order in sales %}
+                        <div class="order-card">
+                            <div class="d-flex justify-content-between">
+                                <div>
+                                    <h6 class="mb-1">{{ order.title }}</h6>
+                                    <p class="text-muted small mb-1">
+                                        <i class="bi bi-currency-ruble"></i> {{ order.price }} ₽
+                                    </p>
+                                    <span class="badge {% if order.status == 'Доставлено' %}bg-success{% elif order.status == 'В пути' %}bg-info{% else %}bg-warning{% endif %}">
+                                        {{ order.status }}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <p class="text-muted text-center py-3">У вас пока нет продаж</p>
+                {% endif %}
+            </div>
+        </div>
+        <div class="card shadow-sm">
+            <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                <h5 class="mb-0"><i class="bi bi-megaphone"></i> Мои объявления</h5>
+                <span class="badge bg-secondary">{{ listings|length }}</span>
+            </div>
+            <div class="card-body">
+                {% if listings %}
+                    {% for listing in listings %}
+                        <div class="d-flex gap-3 p-3 border rounded mb-2 listing-item">
+                            {% if listing.image_filename %}
+                                <img src="{{ url_for('static', filename='uploads/' + listing.image_filename) }}"
+                                     class="listing-image" alt="{{ listing.title }}">
+                            {% else %}
+                                <div class="listing-image bg-secondary bg-opacity-25 d-flex align-items-center justify-content-center">
+                                    <i class="bi bi-image fs-3 text-secondary"></i>
+                                </div>
+                            {% endif %}
+
+                            <div class="flex-grow-1">
+                                <div class="d-flex justify-content-between align-items-start">
+                                    <div>
+                                        <h6 class="mb-1">{{ listing.title }}</h6>
+                                        <p class="text-muted small mb-1">{{ listing.description[:80] }}...</p>
+                                        <p class="text-success fw-bold mb-0">{{ listing.price }} ₽</p>
+                                    </div>
+                                    <div class="text-end">
+                                        <span class="badge {% if listing.status == 'Активно' %}bg-success{% else %}bg-secondary{% endif %} mb-2">
+                                            {{ listing.status }}
+                                        </span>
+                                        <br>
+                                        {% if listing.status == 'Активно' %}
+                                            <form method="POST" action="/delete-listing/{{ listing.id }}" class="d-inline">
+                                                <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('Удалить объявление?')">
+                                                    <i class="bi bi-trash"></i>
+                                                </button>
+                                            </form>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <p class="text-muted text-center py-3">У вас пока нет объявлений</p>
+                {% endif %}
+            </div>
+        </div>
     </div>
 </div>
 {% endblock %}

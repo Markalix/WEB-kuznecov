@@ -8,7 +8,6 @@ class User:
         self.user_model = UserModel
 
     def register(self, username: str, email: str, password: str) -> dict:
-        # Проверка существующего пользователя
         existing_user = self.db.query(self.user_model).filter(
             (self.user_model.username == username) | (self.user_model.email == email)
         ).first()
@@ -16,7 +15,6 @@ class User:
         if existing_user:
             return {"success": False, "message": "Пользователь с таким именем или email уже существует"}
 
-        # Создание нового пользователя
         new_user = self.user_model(
             username=username,
             email=email,

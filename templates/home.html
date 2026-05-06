@@ -1,11 +1,158 @@
 {% extends "base.html" %}
 
+{% block title %}Главная{% endblock %}
+
 {% block content %}
-    {% if session and session.user_id %}
-        <h1>С возвращением, {{ session.username }}!</h1>
-        <p>Вы вошли: {{ session.login_time }}</p>
+    {% if session.user_id %}
+        <div class="alert bg-dark rounded-3 shadow-sm">
+            <div class="d-flex align-items-center text-white">
+                <div>
+                    <h3 class="mb-0">С возвращением, {{ session.username }}!</h3>
+                </div>
+            </div>
+        </div>
     {% else %}
-        <h1>Добро пожаловать!</h1>
-        <p><a href="/login">Войти</a> <a href="/register">Зарегестрироваться</a></p>
+        <div class="bg-dark text-white rounded-3 p-5 mb-4 shadow-sm">
+            <h1 class="display-4">Добро пожаловать в Маркетплейс!</h1>
+            <p class="lead">Покупайте и продавайте товары с удобной доставкой</p>
+            <hr class="my-4 bg-light">
+            <p>Войдите или зарегистрируйтесь, чтобы начать</p>
+            <a href="/login" class="btn btn-light btn-lg me-2">Вход</a>
+            <a href="/register" class="btn btn-outline-light btn-lg">Регистрация</a>
+        </div>
     {% endif %}
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>Товары от пользователей</h2>
+        {% if all_listings %}
+            <span class="badge bg-secondary rounded-pill">{{ all_listings|length }} товаров</span>
+        {% endif %}
+    </div>
+
+    {% if all_listings %}
+        <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4">
+            {% for listing in all_listings %}
+                <div class="col" data-listing-id="{{ listing.id }}">
+                    <div class="card product-card h-100 shadow-sm">
+                        {% if listing.image_filename %}
+                            <img src="{{ url_for('static', filename='uploads/' + listing.image_filename) }}"
+                                 class="card-img-top product-image"
+                                 alt="{{ listing.title }}">
+                        {% else %}
+                            <div class="product-image bg-secondary bg-opacity-25 d-flex align-items-center justify-content-center">
+                                <i class="bi bi-image fs-1 text-secondary"></i>
+                            </div>
+                        {% endif %}
+
+                        <div class="card-body">
+                            <h5 class="card-title">{{ listing.title }}</h5>
+                            <p class="card-text text-muted small">
+                                {{ listing.description[:80] }}{% if listing.description|length > 80 %}...{% endif %}
+                            </p>
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <span class="h5 text-success mb-0">{{ listing.price }} ₽</span>
+                                <span class="badge bg-info">Активно</span>
+                            </div>
+                            <div class="d-flex justify-content-between align-items-center small text-muted">
+                                <span><i class="bi bi-person"></i> {{ listing.user.username if listing.user else 'Пользователь' }}</span>
+                                <span><i class="bi bi-calendar"></i> {{ listing.created_at.strftime('%d.%m.%Y') }}</span>
+                            </div>
+                        </div>
+
+                        <div class="card-footer bg-transparent border-0 pb-3">
+                            {% if session.user_id %}
+                                {% if session.user_id != listing.user_id %}
+                                    <button class="btn btn-primary w-100" onclick="addToCart({{ listing.id }})">
+                                        <i class="bi bi-cart-plus"></i> В корзину
+                                    </button>
+                                {% else %}
+                                    <button class="btn btn-secondary w-100" disabled>
+                                        <i class="bi bi-person-badge"></i> Ваше объявление
+                                    </button>
+                                {% endif %}
+                            {% else %}
+                                <a href="/login" class="btn btn-outline-secondary w-100">
+                                    <i class="bi bi-box-arrow-in-right"></i> Войдите, чтобы купить
+                                </a>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="text-center py-5 bg-white rounded-3 shadow-sm">
+            <h3 class="mt-3">Пока нет товаров</h3>
+            <p class="text-muted">Будьте первым, кто добавит товар!</p>
+            {% if session.user_id %}
+                <a href="/add-listing" class="btn btn-dark">Добавить товар</a>
+            {% endif %}
+        </div>
+    {% endif %}
+
+    <script>
+    function addToCart(listingId) {
+        fetch(`/add-to-cart/${listingId}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Удаляем карточку товара
+                const cardCol = document.querySelector(`.col[data-listing-id="${listingId}"]`);
+                if (cardCol) {
+                    cardCol.remove();
+                }
+
+                // Обновляем счетчик в шапке
+                updateCartCount();
+
+                // Обновляем счетчик товаров на странице
+                const remainingCards = document.querySelectorAll('.col[data-listing-id]');
+                const badge = document.querySelector('.badge.bg-secondary');
+                if (badge && remainingCards.length > 0) {
+                    badge.textContent = remainingCards.length + ' товаров';
+                } else if (badge) {
+                    badge.textContent = '0 товаров';
+                }
+
+                // Если товаров не осталось, показываем сообщение
+                if (remainingCards.length === 0) {
+                    location.reload();
+                } else {
+                    alert('Товар добавлен в корзину!');
+                }
+            } else {
+                alert(data.message);
+            }
+        })
+        .catch(error => {
+            alert('Произошла ошибка');
+        });
+    }
+
+    function updateCartCount() {
+        fetch('/api/cart-count')
+            .then(res => res.json())
+            .then(data => {
+                const badge = document.getElementById('cart-count');
+                if (badge && data.count > 0) {
+                    badge.textContent = data.count;
+                    badge.style.display = 'inline-block';
+                } else if (badge) {
+                    badge.style.display = 'none';
+                }
+            })
+            .catch(err => console.log('Cart count error:', err));
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        {% if session.user_id %}
+        updateCartCount();
+        {% endif %}
+    });
+    </script>
 {% endblock %}

@@ -1,26 +1,65 @@
 {% extends "base.html" %}
 
+{% block title %}Регистрация{% endblock %}
+
 {% block content %}
-<div class="form-container">
-    <h2>Регистрация</h2>
+<div class="row justify-content-center">
+    <div class="col-md-6 col-lg-5">
+        <div class="card shadow-sm">
+            <div class="card-header bg-dark text-white text-center py-3">
+                <h4 class="mb-0"><i class="bi bi-person-plus"></i> Регистрация</h4>
+            </div>
+            <div class="card-body p-4">
+                {% if error %}
+                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                        <i class="bi bi-exclamation-triangle"></i> {{ error }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                {% endif %}
 
-    {% if error %}
-        <div class="error">{{ error }}</div>
-    {% endif %}
+                {% if message %}
+                    <div class="alert alert-success alert-dismissible fade show" role="alert">
+                        <i class="bi bi-check-circle"></i> {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                {% endif %}
 
-    {% if message %}
-        <div class="success">{{ message }}</div>
-    {% endif %}
+                <form method="POST">
+                    <div class="mb-3">
+                        <label for="username" class="form-label">
+                            <i class="bi bi-person"></i> Имя пользователя
+                        </label>
+                        <input type="text" class="form-control" id="username" name="username" required>
+                        <div class="form-text">Только буквы, цифры и символы</div>
+                    </div>
 
-    <form method="POST">
-        <input type="text" name="username" placeholder="Имя пользователя" required>
-        <input type="email" name="email" placeholder="Email" required>
-        <input type="password" name="password" placeholder="Пароль" required>
-        <button type="submit">Зарегистрироваться</button>
-    </form>
+                    <div class="mb-3">
+                        <label for="email" class="form-label">
+                            <i class="bi bi-envelope"></i> Email
+                        </label>
+                        <input type="email" class="form-control" id="email" name="email" required>
+                    </div>
 
-    <p style="text-align: center; margin-top: 15px;">
-        <a href="/login">Уже есть аккаунт? Войти</a>
-    </p>
+                    <div class="mb-3">
+                        <label for="password" class="form-label">
+                            <i class="bi bi-key"></i> Пароль
+                        </label>
+                        <input type="password" class="form-control" id="password" name="password" required>
+                        <div class="form-text">Придумайте надежный пароль</div>
+                    </div>
+
+                    <button type="submit" class="btn btn-dark w-100 py-2">
+                        <i class="bi bi-check-lg"></i> Зарегистрироваться
+                    </button>
+                </form>
+
+                <hr class="my-4">
+
+                <p class="text-center mb-0">
+                    Уже есть аккаунт? <a href="/login">Войти</a>
+                </p>
+            </div>
+        </div>
+    </div>
 </div>
 {% endblock %}

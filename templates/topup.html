@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+
+{% block title %}Пополнение баланса{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card shadow-sm">
+            <div class="card-header bg-white">
+                <h4 class="mb-0"><i class="bi bi-wallet2"></i> Пополнение баланса</h4>
+            </div>
+            <div class="card-body">
+                {% if error %}
+                    <div class="alert alert-danger">{{ error }}</div>
+                {% endif %}
+
+                {% if message %}
+                    <div class="alert alert-success">{{ message }}</div>
+                {% endif %}
+
+                <div class="alert alert-secondary">
+                    <i class="bi bi-info-circle"></i>
+                    <strong>Текущий баланс: {{ "%.2f"|format(session.balance) }} ₽</strong>
+                </div>
+
+                <form method="POST">
+                    <div class="mb-3">
+                        <label for="card_number" class="form-label">
+                            <i class="bi bi-credit-card"></i> Номер карты
+                        </label>
+                        <input type="text" class="form-control" id="card_number" name="card_number"
+                               placeholder="1234 5678 9012 3456" maxlength="19" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="card_holder" class="form-label">
+                            <i class="bi bi-person"></i> Держатель карты
+                        </label>
+                        <input type="text" class="form-control" id="card_holder" name="card_holder"
+                               placeholder="IVAN IVANOV" required>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="expiry_date" class="form-label">Срок действия</label>
+                            <input type="text" class="form-control" id="expiry_date" name="expiry_date"
+                                   placeholder="MM/YY" maxlength="5" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="cvv" class="form-label">CVV</label>
+                            <input type="text" class="form-control" id="cvv" name="cvv"
+                                   placeholder="123" maxlength="3" required>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="amount" class="form-label">
+                            <i class="bi bi-currency-ruble"></i> Сумма пополнения
+                        </label>
+                        <input type="number" class="form-control" id="amount" name="amount"
+                               min="100" step="100" placeholder="1000" required>
+                    </div>
+
+                    <div class="alert alert-warning small">
+                        <i class="bi bi-terminal"></i>
+                        Введите любые данные для пополнения<br>
+                        <small>Пример: 1234 5678 9012 3456, 12/25, 123</small>
+                    </div>
+
+                    <button type="submit" class="btn btn-success w-100 py-2">
+                        <i class="bi bi-check-lg"></i> Пополнить
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
